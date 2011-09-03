@@ -1,0 +1,95 @@
+With the FormTitles helper you can easily add the "title" attribute of your Form input and label elements.
+It extends core FormHelper, and its easy to drop into your applications in 2.0 as you can now alias the Helpers.
+You would put the following in your (App)Controller:
+
+public $helpers = array('Form' => array('className' => 'FormTitles.FormTitles'));
+
+Tests are included and extend core FormHelperTest, so without attaching the included SchemAddBehavior the FormTitlesHelper will behave exactly like regular FormHelper
+
+There are several ways you can set up your model to get the titles loaded for the forms.
+For all 3 methods you need to add SchemAddBehavior to your model.
+
+-   If you have defined $_schema in your model, you can just add the keys "title" and "labelTitle" for the fields.
+    This method is recommended if you already have defined $_schema property already
+
+Let's use Post model as example:
+
+<?php
+
+class Post extends AppModel {
+
+    public $_schema = array(
+		'id' => array(
+                    'type' => 'integer',
+                    'key' => 'primary'
+                ),
+		'name' => array(
+                    'type' => 'string',
+                    'null' => false,
+                    'title' => 'This is the input title for the post name',
+                    'labelTitle' => 'This is the title for the label'
+                ),
+		'body' => array(
+                    'type' => 'text',
+                    'title' => 'This is the input title for the body',
+                    'labelTitle' => 'This is the title for the label'
+                ),
+		'published' => array(
+                    'type' => 'string',
+                    'length' => 1,
+                    'default' => 'N'
+                ),
+		'created' => 'datetime',
+		'updated' => 'datetime'
+	);
+
+}
+
+?>
+-   You can define $schema(note the missing underscore) attribute in your model, with just "title" and "labelTitle" keys
+
+This would look something like:
+
+public $schema = array(
+    'name' => array(
+        'title' => 'This is the input title for the post name',
+        'labelTitle' => 'This is the title for the label'
+    ),
+    'body' => array(
+        'title' => 'This is the input title for the body',
+        'labelTitle' => 'This is the title for the label'
+    ),
+);
+
+-   The last option you have would be by passing it to the $settings array of the behavior.
+
+That would look something like:
+
+public $actsAs = array(
+    'FormTitles.SchemAdd' => array(
+        'name' => array(
+            'title' => 'This is the input title for the post name',
+            'labelTitle' => 'This is the title for the label'
+        ),
+        'body' => array(
+            'title' => 'This is the input title for the body',
+            'labelTitle' => 'This is the title for the label'
+        ),
+    )
+);
+
+The order of above methods is also the same when you would combine a few.
+You can set global title in AppModel when you attach the behavior, if $schema is set that will be used instead.
+If the titles have been set in $_schema they wont be changed at all, by the other methods used
+
+
+Because you can't override protected attribute $_schema from the behavior, you need to override schema() in AppModel with the following code:
+
+
+    function schema($field = false) {
+        $_schema = parent::schema($field);
+        if ($field || !$this->Behaviors->attached('SchemAdd')) {
+           return $_schema;
+        }
+        return $this->addTitles($_schema);
+    }
