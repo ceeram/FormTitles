@@ -10,7 +10,7 @@ There are several ways you can set up your model to get the titles loaded for th
 For all 3 methods you need to add SchemAddBehavior to your model.
 
 -   If you have defined $_schema in your model, you can just add the keys "title" and "labelTitle" for the fields.
-    This method is recommended if you already have defined $_schema property already
+    This method is recommended if you already have defined $_schema property already (also doesn't require the SchemAddBehavior)
 
 Let's use Post model as example:
 
